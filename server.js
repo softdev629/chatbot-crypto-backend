@@ -6,6 +6,7 @@ import { loadQAChain } from "langchain/chains";
 import { OpenAI } from "langchain/llms";
 import { Document } from "langchain/document";
 import { BufferMemory } from "langchain/memory";
+import { PromptTemplate } from "langchain";
 
 // delcares schema of converted json file
 const schema = {
@@ -65,7 +66,6 @@ const llm = new OpenAI({
 });
 
 const memory = new BufferMemory();
-const chain = loadQAChain(llm);
 let docs;
 
 // read excel file & prepare dataset
@@ -97,6 +97,20 @@ readXlsxFile("./given.xlsx", { schema }).then(({ rows, errors }) => {
         } is ${row.supply}. ${row.description}`,
       })
   );
+
+  readXlsxFile("./qa.xlsx", {
+    map: { Question: "question", Answer: "answer" },
+  }).then(({ rows }) => {
+    docs.push(
+      ...rows.map(
+        (row) =>
+          new Document({
+            pageContent: `Question: ${row.question}\nAnswer: ${row.answer}`,
+          })
+      )
+    );
+    console.log(docs);
+  });
 });
 
 const app = express();
@@ -109,13 +123,20 @@ app.get("/", async (req, res) => {
   });
 });
 
+const qa_template = `Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer but you have to say kindly to the normal greetings.
+{context}
+Question: {question}
+Helpful Answer:`;
+const qa_prompt = PromptTemplate.fromTemplate(qa_template);
+const chain = loadQAChain(llm, qa_prompt);
+
 app.post("/", async (req, res) => {
   try {
-    const prompt = req.body.prompt;
+    const query = req.body.prompt;
 
     const response = await chain.call({
       input_documents: docs,
-      question: prompt,
+      question: query,
     });
 
     res.status(200).send({
