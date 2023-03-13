@@ -2,11 +2,12 @@ import express from "express";
 import * as dotenv from "dotenv";
 import cors from "cors";
 import readXlsxFile from "read-excel-file/node";
-import { loadQAChain } from "langchain/chains";
+import { loadQAStuffChain, loadQAChain } from "langchain/chains";
 import { OpenAI } from "langchain/llms";
 import { Document } from "langchain/document";
 import { BufferMemory } from "langchain/memory";
 import { PromptTemplate } from "langchain";
+import { CharacterTextSplitter } from "langchain/text_splitter";
 
 // delcares schema of converted json file
 const schema = {
@@ -66,7 +67,11 @@ const llm = new OpenAI({
 });
 
 const memory = new BufferMemory();
-let docs;
+const splitter = new CharacterTextSplitter({
+  chunkSize: 1000,
+  chunkOverlap: 0,
+});
+let docs, tempDocs;
 
 // read excel file & prepare dataset
 readXlsxFile("./given.xlsx", { schema }).then(({ rows, errors }) => {
@@ -109,7 +114,9 @@ readXlsxFile("./given.xlsx", { schema }).then(({ rows, errors }) => {
           })
       )
     );
-    console.log(docs);
+    // splitter.splitDocuments([...tempDocs]).then((res) => {
+    //   docs = [...res];
+    // });
   });
 });
 
