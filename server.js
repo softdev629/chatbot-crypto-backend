@@ -76,7 +76,7 @@ let docs, tempDocs;
 // read excel file & prepare dataset
 readXlsxFile("./given.xlsx", { schema }).then(({ rows, errors }) => {
   // prompt as possible customer requirement, completion as wine name reply
-  docs = rows.map(
+  tempDocs = rows.map(
     (row) =>
       new Document({
         pageContent: `This is Zk-Rollup named ${row.name}. Token symbol of ${
@@ -106,7 +106,7 @@ readXlsxFile("./given.xlsx", { schema }).then(({ rows, errors }) => {
   readXlsxFile("./qa.xlsx", {
     map: { Question: "question", Answer: "answer" },
   }).then(({ rows }) => {
-    docs.push(
+    tempDocs.push(
       ...rows.map(
         (row) =>
           new Document({
@@ -114,9 +114,9 @@ readXlsxFile("./given.xlsx", { schema }).then(({ rows, errors }) => {
           })
       )
     );
-    // splitter.splitDocuments([...tempDocs]).then((res) => {
-    //   docs = [...res];
-    // });
+    splitter.splitDocuments([...tempDocs]).then((res) => {
+      docs = [...res];
+    });
   });
 });
 
@@ -135,7 +135,7 @@ const qa_template = `Use the following pieces of context to answer the question 
 Question: {question}
 Helpful Answer:`;
 const qa_prompt = PromptTemplate.fromTemplate(qa_template);
-const chain = loadQAChain(llm, qa_prompt);
+const chain = loadQAStuffChain(llm, qa_prompt);
 
 app.post("/", async (req, res) => {
   try {
