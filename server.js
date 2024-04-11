@@ -73,52 +73,52 @@ const splitter = new CharacterTextSplitter({
 });
 let docs, tempDocs;
 
-// read excel file & prepare dataset
-readXlsxFile("./given.xlsx", { schema }).then(({ rows, errors }) => {
-  // prompt as possible customer requirement, completion as wine name reply
-  tempDocs = rows.map(
-    (row) =>
-      new Document({
-        pageContent: `This is Zk-Rollup named ${row.name}. Token symbol of ${
-          row.name
-        } is ${row.tokenSymbol}. ${
-          row.tokenSymbol
-        } was last taken on ${row.date.toDateString()}. ${row.tokenSymbol} has${
-          row.released === "Yes" ? "" : " not"
-        } been released. Price of ${row.tokenSymbol} is ${
-          row.price
-        }$. Price change of ${row.tokenSymbol} in last week is ${(
-          row.weekChange * 100
-        ).toFixed(2)}%. Price change of ${row.tokenSymbol} in last month is ${(
-          row.monthChange * 100
-        ).toFixed(2)}%. Total market value (Market Cap) of ${
-          row.tokenSymbol
-        }'s circulating supply is ${
-          row.marketCap
-        }$. Trading amount(Volume) traded in the last 24 hours is ${
-          row.volume
-        }$. Amount of coins circulating in market and public hands of ${
-          row.tokenSymbol
-        } is ${row.supply}. ${row.description}`,
-      })
-  );
+// // read excel file & prepare dataset
+// readXlsxFile("./given.xlsx", { schema }).then(({ rows, errors }) => {
+//   // prompt as possible customer requirement, completion as wine name reply
+//   tempDocs = rows.map(
+//     (row) =>
+//       new Document({
+//         pageContent: `This is Zk-Rollup named ${row.name}. Token symbol of ${
+//           row.name
+//         } is ${row.tokenSymbol}. ${
+//           row.tokenSymbol
+//         } was last taken on ${row.date.toDateString()}. ${row.tokenSymbol} has${
+//           row.released === "Yes" ? "" : " not"
+//         } been released. Price of ${row.tokenSymbol} is ${
+//           row.price
+//         }$. Price change of ${row.tokenSymbol} in last week is ${(
+//           row.weekChange * 100
+//         ).toFixed(2)}%. Price change of ${row.tokenSymbol} in last month is ${(
+//           row.monthChange * 100
+//         ).toFixed(2)}%. Total market value (Market Cap) of ${
+//           row.tokenSymbol
+//         }'s circulating supply is ${
+//           row.marketCap
+//         }$. Trading amount(Volume) traded in the last 24 hours is ${
+//           row.volume
+//         }$. Amount of coins circulating in market and public hands of ${
+//           row.tokenSymbol
+//         } is ${row.supply}. ${row.description}`,
+//       })
+//   );
 
-  readXlsxFile("./qa.xlsx", {
-    map: { Question: "question", Answer: "answer" },
-  }).then(({ rows }) => {
-    tempDocs.push(
-      ...rows.map(
-        (row) =>
-          new Document({
-            pageContent: `Question: ${row.question}\nAnswer: ${row.answer}`,
-          })
-      )
-    );
-    splitter.splitDocuments([...tempDocs]).then((res) => {
-      docs = [...res];
-    });
-  });
-});
+//   readXlsxFile("./qa.xlsx", {
+//     map: { Question: "question", Answer: "answer" },
+//   }).then(({ rows }) => {
+//     tempDocs.push(
+//       ...rows.map(
+//         (row) =>
+//           new Document({
+//             pageContent: `Question: ${row.question}\nAnswer: ${row.answer}`,
+//           })
+//       )
+//     );
+//     splitter.splitDocuments([...tempDocs]).then((res) => {
+//       docs = [...res];
+//     });
+//   });
+// });
 
 const app = express();
 app.use(cors());
